@@ -1,6 +1,9 @@
 /.metadata/
 /.metadata/
 /.recommenders/
+.DS_Store
+.DS_Store?
+Practices/.DS_Store
 
 ### VAHID ###
 Thumbs.db
