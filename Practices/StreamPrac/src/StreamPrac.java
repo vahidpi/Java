@@ -1,5 +1,13 @@
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class StreamPrac {
@@ -16,19 +24,170 @@ public class StreamPrac {
       , "Juxtaposition");
 
   public static void main(String[] args) {
-    System.out.println("Hello World, Java app");
-    staticMethod();
-
+//    System.out.println("Hello World, Java app");
+//    staticMethod();
+//
     StreamPrac streamPrac = new StreamPrac();
+//
+//    streamPrac.publicNonStaticMethodInClass();
+//    streamPrac.privateNonStaticMethodInClass();
+//
+//    example1();
+//    streamPrac.example2();
+//    example3();
+//    streamPrac.example4();
 
-    streamPrac.publicNonStaticMethodInClass();
-    streamPrac.privateNonStaticMethodInClass();
+    //streamPrac.exFunc();
 
-    example1();
-    streamPrac.example2();
-    example3();
-    streamPrac.example4();
+    // 1
+    //    Collection<Integer> numbers = Arrays.asList(1, 2, 1, 3);
+    //    for (int number : streamPrac.findUniqueNumbers2(numbers))
+    //      System.out.println(number);
+
+    // 2
+    // int x = nthLowestSelling(new int[] { 5, 4, 3, 2, 1, 5, 4, 3, 2, 5, 4, 3, 5, 4, 5 }, 2);
+    // System.out.println(x);
+
+    // 3
+
+      boolean[][] matrix = new boolean[][] {
+          {false, true, false, false, true},
+          {true, false, false, false, false},
+          {false, false, false, true, false},
+          {false, false, true, false, false},
+          {true, false, false, false, false}
+      };
+      System.out.println(getMinimumConnections2(matrix)); // should print 1
+
   }
+  private static class UnionFind {
+    private int[] parent;
+    private int count;
+
+    public UnionFind(int n) {
+      parent = new int[n];
+      for (int i = 0; i < n; i++) {
+        parent[i] = i;
+      }
+      count = n;
+    }
+
+    public int find(int p) {
+      while (p != parent[p]) {
+        parent[p] = parent[parent[p]];
+        p = parent[p];
+      }
+      return p;
+    }
+
+    public void union(int p, int q) {
+      int rootP = find(p);
+      int rootQ = find(q);
+      if (rootP == rootQ) {
+        return;
+      }
+      parent[rootP] = rootQ;
+      count--;
+    }
+
+    public int count() {
+      return count;
+    }
+  }
+
+  public static int getMinimumConnections2(boolean[][] matrix){
+    int n = matrix.length;
+    int[] parent = new int[n];
+    int count = n;
+
+    for (int i = 0; i < n; i++) {
+      parent[i] = i;
+    }
+
+    for (int i = 0; i < n; i++) {
+      for (int j = 0; j < n; j++) {
+        if (matrix[i][j]) {
+          int root1 = find(parent, i);
+          int root2 = find(parent, j);
+          if (root1 != root2) {
+            parent[root1] = root2;
+            count--;
+          }
+        }
+      }
+    }
+
+    return count - 1;
+  }
+
+  private static int find(int[] parent, int i) {
+    while (parent[i] != i) {
+      parent[i] = parent[parent[i]];
+      i = parent[i];
+    }
+    return i;
+  }
+
+  public static int getMinimumConnections(boolean[][] matrix) {
+    int n = matrix.length;
+    UnionFind uf = new UnionFind(n);
+
+    for (int i = 0; i < n; i++) {
+      for (int j = 0; j < n; j++) {
+        if (matrix[i][j]) {
+          uf.union(i, j);
+        }
+      }
+    }
+
+    return uf.count() - 1;
+  }
+
+  public static int nthLowestSelling(int[] sales, int n) {
+    Map<Integer, Integer> bookSales = new HashMap<>();
+    for (int sale : sales) {
+      bookSales.put(sale, bookSales.getOrDefault(sale, 0) + 1);
+    }
+
+    List<Map.Entry<Integer, Integer>> sortedEntries = new ArrayList<>(bookSales.entrySet());
+    sortedEntries.sort(Map.Entry.comparingByValue());
+
+    if (n > sortedEntries.size()) {
+      throw new IllegalArgumentException("n is larger than the number of distinct book sales");
+    }
+
+    return sortedEntries.get(n - 1).getKey();
+  }
+
+
+
+  public Collection<Integer> findUniqueNumbers2(Collection<Integer> numbers) {
+    return numbers.stream()
+        .collect(Collectors.groupingBy(Function.identity(), LinkedHashMap::new, Collectors.counting()))
+        .entrySet()
+        .stream()
+        .filter(entry -> entry.getValue() == 1)
+        .map(Map.Entry::getKey)
+        .collect(Collectors.toList());
+
+  }
+
+  public Collection<Integer> findUniqueNumbers(Collection<Integer> numbers){
+    Map<Integer, Integer> frequency = new HashMap<>();
+    for (int num : numbers) {
+      frequency.put(num, frequency.getOrDefault(num, 0) + 1);
+    }
+    Set<Integer> result = new HashSet<>();
+    for (int num : frequency.keySet()) {
+      if (frequency.get(num) == 1) {
+        result.add(num);
+      }
+    }
+    return result;
+
+
+  }
+
 
   static void staticMethod() {
     System.out.println("Static method can be called directly.");
